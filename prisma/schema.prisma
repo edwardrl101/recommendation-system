@@ -12,20 +12,34 @@ model User {
   name      String?
   email     String   @unique
   password  String
+  role      String?     @default("COLLECTOR")
   image     String?
   preferences Json?
+  onboarded Boolean  @default(false)
+
+  bio       String?
+  website   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   likes     Like[]
+  artworks  Artwork[] @relation("ArtistArtworks")
 }
 
 model Artwork {
   id        String   @id @default(cuid())
   title     String
-  artist    String
+  artistId  String
+  artist    User  @relation("ArtistArtworks", fields: [artistId], references: [id])
   imageUrl  String
   price     Float
+  medium    String?
+  dimensions  String?
   tags      String[]
+
+  embedding_id  String? @unique
+  emotions      Json?
+
   createdAt DateTime @default(now())
   likes     Like[]
 }

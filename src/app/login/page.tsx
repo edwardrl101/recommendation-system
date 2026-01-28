@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSession } from "next-auth/react";
 import Link from "next/link";
 
 function LoginForm() {
@@ -37,7 +38,19 @@ function LoginForm() {
             setError("Invalid email or password");
             setLoading(false);
         } else {
-            router.push("/dashboard");
+            const session = await getSession();
+            if (!session?.user?.onboarded) {
+                router.push("/onboarding");
+            } else {
+                // Check the role and route accordingly
+                const userRole = (session.user as any).role;
+                if (userRole === "ARTIST") {
+                    router.push("/artist/dashboard");
+                } else {
+                    router.push("/dashboard");
+                }
+            }
+            router.refresh();
         }
     };
 
