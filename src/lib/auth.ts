@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -39,12 +38,13 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Invalid credentials");
                 }
 
+                const dbUser = user as unknown as { role?: string; onboarded: boolean };
                 return {
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    role: user.role,
-                    onboarded: user.onboarded
+                    role: dbUser.role || "COLLECTOR",
+                    onboarded: dbUser.onboarded
                 };
             }
         })
@@ -59,22 +59,22 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.id = user.id;
-                token.role = (user as any).role;
-                token.onboarded = (user as any).onboarded;
+                token.role = user.role;
+                token.onboarded = user.onboarded;
             }
 
             if (trigger === "update" && session) {
                 token.role = session.user.role;
                 token.onboarded = session.user.onboarded;
-            
+
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
-                (session.user as any).id = token.id;
-                (session.user as any).role = token.role;
-                (session.user as any).onboarded = token.onboarded;
+                session.user.id = token.id;
+                session.user.role = token.role;
+                session.user.onboarded = token.onboarded;
             }
             return session;
         }

@@ -27,7 +27,7 @@ const BUDGET_RANGES = [
 
 export default function OnboardingPage() {
     const router = useRouter();
-    const { data: session, update, status } = useSession();
+    const { data: session, update } = useSession();
     const [step, setStep] = useState(0);
     const [role, setRole] = useState<"COLLECTOR" | "ARTIST" | null>(null);
     const [preferences, setPreferences] = useState({
@@ -85,7 +85,7 @@ export default function OnboardingPage() {
             <Navbar />
             <div className="max-w-2xl mx-auto py-16 px-4">
                 <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 transition-all">
-                    
+
                     {/* Progress Indicator */}
                     <div className="mb-10 text-center">
                         <span className="text-indigo-600 font-bold text-sm tracking-widest uppercase">

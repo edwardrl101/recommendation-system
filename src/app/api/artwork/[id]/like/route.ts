@@ -50,9 +50,10 @@ export async function POST(
             });
             return NextResponse.json({ message: "Liked" });
         }
-    } catch (error: any) {
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Internal Server Error";
         return NextResponse.json(
-            { message: "Error toggling like", error: error.message },
+            { message: "Error toggling like", error: message },
             { status: 500 }
         );
     }

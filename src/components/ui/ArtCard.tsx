@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-interface ArtworkProps {
+export interface ArtworkProps {
     id: string;
     title: string;
     artist: {
@@ -13,6 +13,9 @@ interface ArtworkProps {
     price: number;
     tags: string[];
     isLiked?: boolean;
+    likes?: { id: string }[];
+    medium?: string;
+    createdAt?: string | Date;
 }
 
 // export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
@@ -91,8 +94,8 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
     const [liked, setLiked] = useState(artwork.isLiked || false);
 
     // Helper to handle both string and object formats
-    const artistName = typeof artwork.artist === 'string' 
-        ? artwork.artist 
+    const artistName = typeof artwork.artist === 'string'
+        ? artwork.artist
         : artwork.artist?.name || "Unknown Artist";
 
     const toggleLike = async () => {
@@ -101,8 +104,8 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
             await fetch(`/api/artwork/${artwork.id}/like`, {
                 method: "POST",
             });
-        } catch (error) {
-            setLiked(liked); 
+        } catch {
+            setLiked(liked);
         }
     };
 
@@ -119,8 +122,8 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
                     <button
                         onClick={toggleLike}
                         className={`w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md transition-all ${liked
-                                ? "bg-red-500 text-white shadow-lg"
-                                : "bg-white/70 text-gray-900 hover:bg-white hover:scale-110"
+                            ? "bg-red-500 text-white shadow-lg"
+                            : "bg-white/70 text-gray-900 hover:bg-white hover:scale-110"
                             }`}
                     >
                         <svg

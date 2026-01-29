@@ -94,12 +94,11 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "@/components/ui/Navbar";
-import ArtCard from "@/components/ui/ArtCard";
+import ArtCard, { ArtworkProps } from "@/components/ui/ArtCard";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-    const [artworks, setArtworks] = useState<any[]>([]);
+    const [artworks, setArtworks] = useState<ArtworkProps[]>([]);
     const [styles, setStyles] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 

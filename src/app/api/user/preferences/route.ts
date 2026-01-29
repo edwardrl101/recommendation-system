@@ -26,9 +26,10 @@ export async function PUT(req: Request) {
         });
 
         return NextResponse.json({ message: "Preferences updated", user: updatedUser });
-    } catch (error: any) {
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Internal Server Error";
         return NextResponse.json(
-            { message: "Error updating preferences", error: error.message },
+            { message: "Error updating preferences", error: message },
             { status: 500 }
         );
     }
@@ -54,7 +55,7 @@ export async function GET() {
         const searchStyles = preferences.styles.map(s => s.toLowerCase());
 
         // Parse Price Range
-        const budgetStr = preferences.budget.replace(/[\$,]/g, ""); 
+        const budgetStr = preferences.budget.replace(/[\$,]/g, "");
         let minPrice = 0, maxPrice = 1000000;
 
         if (budgetStr.includes("-")) {
@@ -100,7 +101,8 @@ export async function GET() {
             userStyles: preferences.styles // Send back for the UI header
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        return NextResponse.json({ message }, { status: 500 });
     }
 }

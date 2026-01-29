@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSession } from "next-auth/react";
@@ -15,13 +15,8 @@ function LoginForm() {
     });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState("");
-
-    useEffect(() => {
-        if (searchParams.get("registered")) {
-            setSuccess("Account created successfully! Please sign in.");
-        }
-    }, [searchParams]);
+    const registered = searchParams.get("registered");
+    const success = registered ? "Account created successfully! Please sign in." : "";
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,18 +34,22 @@ function LoginForm() {
             setLoading(false);
         } else {
             const session = await getSession();
-            if (!session?.user?.onboarded) {
+            if (!session?.user) {
+                router.push("/dashboard");
+                return;
+            }
+
+            if (!session.user.onboarded) {
                 router.push("/onboarding");
             } else {
                 // Check the role and route accordingly
-                const userRole = (session.user as any).role;
+                const userRole = session.user.role;
                 if (userRole === "ARTIST") {
                     router.push("/artist/dashboard");
                 } else {
                     router.push("/dashboard");
                 }
             }
-            router.refresh();
         }
     };
 
@@ -100,7 +99,7 @@ function LoginForm() {
             </form>
             <div className="text-center">
                 <p className="text-sm text-gray-600">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
                         Sign up
                     </Link>

@@ -66,7 +66,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3">Context Aware</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Recommendations tailored to your specific space, whether it's your home, office, or gallery.
+                Recommendations tailored to your specific space, whether it&apos;s your home, office, or gallery.
               </p>
             </div>
           </div>
