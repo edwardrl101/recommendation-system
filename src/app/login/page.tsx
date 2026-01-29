@@ -33,22 +33,32 @@ function LoginForm() {
             setError("Invalid email or password");
             setLoading(false);
         } else {
+            // Get the current session to check onboarding status and role
             const session = await getSession();
-            if (!session?.user) {
-                router.push("/dashboard");
-                return;
-            }
 
-            if (!session.user.onboarded) {
-                router.push("/onboarding");
-            } else {
-                // Check the role and route accordingly
-                const userRole = session.user.role;
-                if (userRole === "ARTIST") {
-                    router.push("/artist/dashboard");
+            // If we have a session, we can do custom routing
+            if (session?.user) {
+                if (!(session.user as any).onboarded) {
+                    window.location.href = "/onboarding";
                 } else {
-                    router.push("/dashboard");
+                    const userRole = (session.user as any).role;
+                    if (userRole === "ARTIST") {
+                        window.location.href = "/artist/dashboard";
+                    } else {
+                        // Respect the callbackUrl if it exists and isn't just the login page
+                        const callbackUrl = searchParams.get("callbackUrl");
+                        if (callbackUrl && !callbackUrl.includes("/login")) {
+                            window.location.href = callbackUrl;
+                        } else {
+                            window.location.href = "/dashboard";
+                        }
+                    }
                 }
+            } else {
+                // If session is still not detected, try redirecting to the callbackUrl or dashboard
+                // and let the server-side session handle it.
+                const callback = searchParams.get("callbackUrl") || "/dashboard";
+                window.location.href = callback;
             }
         }
     };
