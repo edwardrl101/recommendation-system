@@ -33,6 +33,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
+    const userId = (session.user as any).id;
+
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -47,12 +49,12 @@ export async function POST(req: Request) {
     ? tagsRaw.split(",").map(t => t.trim().toLowerCase()).filter(t => t !== "") 
     : [];
 
-    // 1. Convert File to ArrayBuffer for Supabase
+    // Convert File to ArrayBuffer for Supabase
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const fileName = `${session.user.id}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const fileName = `${userId}/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
 
-    // 2. Upload to Storage
+    // Upload to Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from("artwork")
       .upload(fileName, buffer, {
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
 
     const { data: { publicUrl } } = supabase.storage.from("artwork").getPublicUrl(fileName);
 
-    // 3. Save to DB
+    // Save to DB
     const newArtwork = await prisma.artwork.create({
       data: {
         title,
