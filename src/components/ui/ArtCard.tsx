@@ -16,6 +16,7 @@ export interface ArtworkProps {
     likes?: { id: string }[];
     medium?: string;
     createdAt?: string | Date;
+    recommendationReason?: string;
 }
 
 // export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
@@ -149,7 +150,7 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
                 </div>
             </div>
             <div className="p-6 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-1">
                     <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
                         {artwork.title}
                     </h3>
@@ -157,8 +158,19 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
                         ${artwork.price.toLocaleString()}
                     </span>
                 </div>
-                {/* Use the helper variable here */}
-                <p className="text-gray-500 font-medium mb-4">{artistName}</p>
+                <p className="text-gray-500 font-medium mb-2">{artistName}</p>
+
+                {artwork.recommendationReason && (
+                    <div className="mt-1 mb-4 p-2 bg-indigo-50 rounded-lg">
+                        <p className="text-[11px] font-bold text-indigo-600 uppercase tracking-tight">
+                            Why it matches:
+                        </p>
+                        <p className="text-xs text-indigo-900 italic line-clamp-2">
+                            "{artwork.recommendationReason}"
+                        </p>
+                    </div>
+                )}
+
                 <button className="w-full mt-auto py-3 bg-gray-50 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all transform active:scale-95">
                     View Details
                 </button>
