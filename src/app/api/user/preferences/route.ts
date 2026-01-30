@@ -51,7 +51,11 @@ export async function GET() {
             return NextResponse.json({ message: "No preferences found" }, { status: 404 });
         }
 
-        const preferences = user.preferences as { budget: string; styles: string[] };
+        const preferences = user.preferences as {
+            budget: string;
+            styles: string[];
+            context?: string
+        };
         const searchStyles = preferences.styles.map(s => s.toLowerCase());
 
         // Parse Price Range
@@ -63,21 +67,12 @@ export async function GET() {
             minPrice = parseInt(parts[0]) || 0;
             maxPrice = parseInt(parts[1]) || 1000000;
         } else if (budgetStr.includes("+")) {
-            minPrice = parseInt(budgetStr) || 0;
+            minPrice = parseInt(budgetStr.replace("+", "")) || 0;
         }
 
-        // Fetch Artworks with Join
+        // Fetch Artworks
         const artworks = await prisma.artwork.findMany({
             where: {
-                OR: [
-                    // 1. Check for exact matches in tags
-                    { tags: { hasSome: searchStyles } },
-                    // 2. Fuzzy search: Check if any style is contained in the title or medium
-                    ...searchStyles.map(style => ({
-                        title: { contains: style, mode: 'insensitive' as const }
-                    }))
-                ],
-                // Only apply price filter if explicitly set
                 price: { gte: minPrice, lte: maxPrice }
             },
             include: {
@@ -88,17 +83,67 @@ export async function GET() {
 
         const likedIds = user.likes.map(l => l.artworkId);
 
-        // Map data to a "Flat" structure for the frontend
-        const formattedArtworks = artworks.map(art => ({
-            ...art,
-            artistName: art.artist?.name || "Independent Artist",
-            isLiked: likedIds.includes(art.id),
-            likesCount: art.likes.length
-        }));
+        // Advanced Logic: Score artworks based on tags and context-emotions
+        const scoredArtworks = artworks.map(art => {
+            let score = 0;
+            const reasons: string[] = [];
+
+            // 1. Tag Match Score
+            const matchingTags = art.tags.filter(t => searchStyles.includes(t.toLowerCase()));
+            if (matchingTags.length > 0) {
+                score += matchingTags.length * 10;
+                reasons.push(`Matches your interest in ${matchingTags.join(", ")}`);
+            }
+
+            // 2. Context-Emotion Match Score
+            if (preferences.context && art.emotions) {
+                const emotions = art.emotions as Record<string, number>;
+
+                if (preferences.context === "home") {
+                    // Home prefers calm, peaceful, serene
+                    const homeScore = (emotions.calm || 0) + (emotions.peaceful || 0) + (emotions.serene || 0);
+                    if (homeScore > 0.5) {
+                        score += homeScore * 5;
+                        reasons.push("Perfect for a relaxing home environment");
+                    }
+                } else if (preferences.context === "office") {
+                    // Office prefers energetic, inspiring, structured
+                    const officeScore = (emotions.energetic || 0) + (emotions.structured || 0) + (emotions.bold || 0);
+                    if (officeScore > 0.5) {
+                        score += officeScore * 5;
+                        reasons.push("Provides energy and focus for your workspace");
+                    }
+                } else if (preferences.context === "collection") {
+                    // Collections might prefer avant-garde or majestic pieces
+                    const collectionScore = (emotions.majestic || 0) + (emotions.mystical || 0) + (emotions.raw || 0);
+                    if (collectionScore > 0.5) {
+                        score += collectionScore * 5;
+                        reasons.push("Unique piece for high-end curation");
+                    }
+                }
+            }
+
+            return {
+                ...art,
+                artistName: art.artist?.name || "Independent Artist",
+                isLiked: likedIds.includes(art.id),
+                likesCount: art.likes.length,
+                recommendationScore: score,
+                recommendationReason: reasons[0] || "Fits your overall aesthetic"
+            };
+        });
+
+        // Filter out zero scores if we have enough results, otherwise keep them
+        let finalArtworks = scoredArtworks.sort((a, b) => b.recommendationScore - a.recommendationScore);
+
+        // Ensure at least some variety if no tags match
+        if (finalArtworks.length > 0 && finalArtworks[0].recommendationScore === 0) {
+            // Keep original order or shuffle
+        }
 
         return NextResponse.json({
-            artworks: formattedArtworks,
-            userStyles: preferences.styles // Send back for the UI header
+            artworks: finalArtworks.slice(0, 20),
+            userStyles: preferences.styles
         });
 
     } catch (error) {
