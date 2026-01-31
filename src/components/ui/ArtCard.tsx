@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
-import LikeButton from "./LikeButton";
+import LikeButton from "@/components/ui/LikeButton";
 
 export interface ArtworkProps {
     id: string;
@@ -94,23 +93,12 @@ export interface ArtworkProps {
 // }
 
 export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
-    const [liked, setLiked] = useState(artwork.isLiked || false);
-
     // Helper to handle both string and object formats
     const artistName = typeof artwork.artist === 'string'
         ? artwork.artist
         : artwork.artist?.name || "Unknown Artist";
 
-    const toggleLike = async () => {
-        setLiked(!liked);
-        try {
-            await fetch(`/api/artwork/${artwork.id}/like`, {
-                method: "POST",
-            });
-        } catch {
-            setLiked(liked);
-        }
-    };
+    const isInitiallyLiked = artwork.isLiked || false;
 
     return (
         <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col h-full">
@@ -124,7 +112,7 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
                 <div className="absolute top-4 right-4">
                     <LikeButton
                         artworkId={artwork.id}
-                        initialLiked={liked}
+                        initialLiked={isInitiallyLiked}
                         className="w-12 h-12 rounded-full"
                     />
                 </div>
