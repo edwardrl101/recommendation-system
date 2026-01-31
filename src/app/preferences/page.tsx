@@ -136,7 +136,7 @@ export default function PreferencesPage() {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex-1 bg-black text-blue py-4 rounded-2xl font-bold text-lg shadow-xl shadow-black/10 hover:bg-gray-900 transition-all disabled:bg-gray-400"
+                        className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-indigo-100 hover:bg-indigo-500 transition-all disabled:bg-gray-400"
                     >
                         {saving ? "Saving Changes..." : "Apply Preferences"}
                     </button>

@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Link from "next/link";
+import LikeButton from "./LikeButton";
 
 export interface ArtworkProps {
     id: string;
@@ -120,26 +122,11 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute top-4 right-4">
-                    <button
-                        onClick={toggleLike}
-                        className={`w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md transition-all ${liked
-                            ? "bg-red-500 text-white shadow-lg"
-                            : "bg-white/70 text-gray-900 hover:bg-white hover:scale-110"
-                            }`}
-                    >
-                        <svg
-                            className={`w-6 h-6 ${liked ? "fill-current" : "fill-none"}`}
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                            />
-                        </svg>
-                    </button>
+                    <LikeButton
+                        artworkId={artwork.id}
+                        initialLiked={liked}
+                        className="w-12 h-12 rounded-full"
+                    />
                 </div>
                 <div className="absolute bottom-4 left-4 flex gap-1 flex-wrap">
                     {artwork.tags?.map(tag => (
@@ -171,9 +158,11 @@ export default function ArtCard({ artwork }: { artwork: ArtworkProps }) {
                     </div>
                 )}
 
-                <button className="w-full mt-auto py-3 bg-gray-50 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all transform active:scale-95">
-                    View Details
-                </button>
+                <Link href={`/artwork/${artwork.id}`} className="w-full mt-auto">
+                    <button className="w-full py-3 bg-gray-50 text-gray-900 font-bold rounded-xl hover:bg-gray-900 hover:text-white transition-all transform active:scale-95">
+                        View Details
+                    </button>
+                </Link>
             </div>
         </div>
     );
